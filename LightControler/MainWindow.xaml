@@ -9,7 +9,11 @@
     mc:Ignorable="d"
     Title="LightController">
     <ScrollView>
-        <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
+        <ScrollView.Resources>
+            <local:Bool2StringConverter x:Key="bool2StringConverter" />
+            <!--local:LightControllerCore x:Key="LightControllerCore" x:Name="LightControllerCore"/-->
+        </ScrollView.Resources>
+        <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="10">
             <Grid.Resources>
                 <Style x:Key="ColorPresenterStyle" TargetType="Rectangle">
                     <Setter Property="Width" Value="20" />
@@ -28,46 +32,57 @@
             </Grid.Resources>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" MinWidth="200"/>
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
             <TextBlock Text="Brightness" FontSize="24" Grid.Row="0" Grid.Column="0" Margin="10"/>
-            <Slider Minimum="0" Maximum="255" Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" Margin="10" HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
+            <Slider Minimum="0" 
+                Maximum="255" 
+                Grid.Row="0" 
+                Grid.Column="1" 
+                Grid.ColumnSpan="2" 
+                Margin="10" 
+                HorizontalAlignment="Stretch" 
+                VerticalAlignment="Center"
+                x:Name="BrightnessSlider"
+                Value="{Binding Path=CurrentBrightness, Mode=TwoWay}"/>
             <TextBlock Text="Color" FontSize="24" Grid.Row="1" Grid.Column="0" Margin="10"/>
             <Rectangle 
-            Width="20" 
-            Height="20" 
-            Grid.Row="1" 
-            Grid.Column="1" 
-            Style="{StaticResource ColorPresenterStyle}" 
-            RadiusX="3" 
-            RadiusY="3"
-            Margin="10"
-            HorizontalAlignment="Left">
+                Width="20" 
+                Height="20" 
+                Grid.Row="1" 
+                Grid.Column="1" 
+                Style="{StaticResource ColorPresenterStyle}" 
+                RadiusX="3" 
+                RadiusY="3"
+                Margin="10"
+                HorizontalAlignment="Left">
                 <Rectangle.Fill>
                     <SolidColorBrush Color="{Binding Path=Color, ElementName=ColorPicker, Mode=TwoWay}" />
                 </Rectangle.Fill>
             </Rectangle>
-            <ColorPicker
-            x:Name="ColorPicker"
-            IsMoreButtonVisible="True"
-            ColorSpectrumShape="Box"
-            IsColorSliderVisible="True"
-            IsColorChannelTextInputVisible="True"
-            IsHexInputVisible="True"
-            IsAlphaEnabled="False"
-            IsAlphaSliderVisible="True"
-            IsAlphaTextInputVisible="True" 
-            Grid.Column="2"
-            Grid.Row="1"
-            Grid.RowSpan="3"
-            Margin="10"
+            <ColorPicker 
+                x:Name="ColorPicker"
+                IsMoreButtonVisible="True"
+                ColorSpectrumShape="Box"
+                IsColorSliderVisible="True"
+                IsColorChannelTextInputVisible="True"
+                IsHexInputVisible="True"
+                IsAlphaEnabled="False"
+                IsAlphaSliderVisible="True"
+                IsAlphaTextInputVisible="True" 
+                Grid.Column="2"
+                Grid.Row="1"
+                Grid.RowSpan="4"
+                Margin="10"
+                Color="{Binding Path=CurrentColor, Mode=TwoWay}"
             />
             <TextBlock Text="Mode" FontSize="24" Grid.Row="2" Grid.Column="0" Margin="10"/>
             <SplitButton x:Name="LightModeButton" Grid.Column="1" Grid.Row="2" Margin="10">
@@ -95,6 +110,27 @@
                     </Flyout>
                 </SplitButton.Flyout>
             </SplitButton>
+            <TextBlock Text="Port:" FontSize="24" Grid.Row="3" Grid.Column="0" Margin="10"/>
+            <StackPanel Orientation="Horizontal" Grid.Column="1" Grid.Row="3">
+                <ComboBox x:Name="PortComboBox" 
+                      Margin="10" 
+                      HorizontalAlignment="Stretch" 
+                      VerticalAlignment="Center" 
+                      ItemsSource="{Binding Ports}"
+                      SelectionChanged="PortComboBox_SelectionChanged"/>
+                <ComboBox x:Name="BaudRateComboBox"
+                      Margin="10"
+                      HorizontalAlignment="Stretch"
+                      VerticalAlignment="Center"
+                      ItemsSource="{Binding BaudRates}"
+                      SelectionChanged="BaudRateComboBox_SelectionChanged"
+                      IsEditable="True"/>
+                <TextBlock x:Name="Status"
+                       Text="Error"
+                       FontSize="20"
+                       Margin="10"/>
+
+            </StackPanel>
         </Grid>
     </ScrollView>
 </Window>

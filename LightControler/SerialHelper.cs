@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO.Ports;
 using System.Threading;
+using Microsoft.UI.Xaml.Data;
+using System.ComponentModel;
 
 namespace LightController
 {
@@ -14,6 +16,7 @@ namespace LightController
         public event Action<string> WarnLog;
         public event Action<string, System.Exception> ErrorLog;
         public event Action<byte[]> ReceiveHandler;
+        public static CancellationTokenSource source = new CancellationTokenSource();
         public event Action<byte[]> SendHandler;
         private SerialPort _port;
         private bool isBusy = false;
@@ -146,12 +149,20 @@ namespace LightController
         /// <returns></returns>
         public byte[] Send(byte[] data, int recLength)
         {
-            if (!IsPortOpen)
-            {
-                ErrorLog?.Invoke("串口无实例或未打开", new InvalidOperationException());
-                return null;
+            try{ 
+                if (!IsPortOpen)
+                {
+                    ErrorLog?.Invoke("串口无实例或未打开", new InvalidOperationException());
+                    return null;
+                }
+                return DoSendOrRead(false, data, recLength, 0, 0);
             }
-            return DoSendOrRead(false, data, recLength, 0, 0);
+            catch (OperationCanceledException) { return null; }
+        }
+        async public Task<byte[]> SendAsync(byte[] data, int recLength)
+        {
+            var task = await Task.Run(() => Send(data, recLength));
+            return task;
         }
 
         public void Write(string data)
@@ -206,6 +217,7 @@ namespace LightController
                 SendHandler?.Invoke(data);
                 if (IsWriteInfo) InfoSend(data);
                 _port.ReadTimeout = this.ReadTimeOut;
+                _port.WriteTimeout = this.ReadTimeOut;
                 byte[] buffer = new byte[recLength];
                 lock (_port)
                 {
